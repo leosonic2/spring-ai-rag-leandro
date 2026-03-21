@@ -17,7 +17,9 @@ public class VectorStoreProperties {
         return vectorStorePath;
     }
 
-    public void setVectorStorePath(String vectorStorePath) {}
+    public void setVectorStorePath(String vectorStorePath) {
+        this.vectorStorePath = vectorStorePath;
+    }
 
     public List<Resource> getDocumentsToLoad() {
         return documentsToLoad;

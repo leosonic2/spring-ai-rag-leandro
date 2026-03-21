@@ -22,10 +22,11 @@ public class VectorStoreConfig {
         SimpleVectorStore simpleVectorStore = SimpleVectorStore.builder(embeddingModel).build();
         File vectorStoreFile = new File(vectorStoreProperties.getVectorStorePath());
 
-        if (!vectorStoreFile.exists()) {
+        if (vectorStoreFile.exists()) {
+            log.debug("Vector store file found, loading from: " + vectorStoreFile.getAbsolutePath());
             simpleVectorStore.load(vectorStoreFile);
         } else {
-            log.debug("Loading documents from " + vectorStoreFile.getAbsolutePath());
+            log.debug("Vector store file not found, building from documents...");
             vectorStoreProperties.getDocumentsToLoad().forEach(document -> {
                 log.debug("Loading the document: " + document);
                 TikaDocumentReader documentReader = new TikaDocumentReader(document);
