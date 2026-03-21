@@ -41,15 +41,78 @@ All credits for the course content and architecture guidance go to the author:
 src/
 └── main/
     ├── java/guru/springframework/springairag/
-    │   ├── SpringAiRagApplication.java       # Application entry point
-    │   └── config/
-    │       ├── VectorStoreConfig.java         # SimpleVectorStore bean configuration
-    │       └── VectorStoreProperties.java     # External config properties (sfg.aiapp)
+    │   ├── SpringAiRagApplication.java          # Application entry point
+    │   ├── config/
+    │   │   ├── VectorStoreConfig.java            # SimpleVectorStore bean — loads or builds the vector store
+    │   │   └── VectorStoreProperties.java        # External config properties (sfg.aiapp)
+    │   ├── model/
+    │   │   ├── Question.java                     # Record — incoming question payload
+    │   │   └── Answer.java                       # Record — outgoing answer payload
+    │   ├── service/
+    │   │   ├── OpenAiService.java                # Service interface
+    │   │   └── OpenAiServiceImpl.java            # Calls OpenAI via ChatModel and returns the answer
+    │   └── resource/
+    │       └── QuestionController.java           # REST controller — exposes POST /ask
     └── resources/
-        ├── application.properties             # App settings
-        └── data/
-            └── movies500.csv                  # Movie dataset used to populate the vector store
+        ├── application.properties                # App settings
+        └── movies500.csv                         # Movie dataset used to populate the vector store
 ```
+
+---
+
+## API Usage
+
+### `POST /ask`
+
+Sends a question to OpenAI and returns the AI-generated answer.
+
+**Request body:**
+```json
+{
+  "question": "What is the best sci-fi movie of the 90s?"
+}
+```
+
+**Response body:**
+```json
+{
+  "answer": "Many consider The Matrix (1999) to be the best sci-fi film of the 90s..."
+}
+```
+
+**Example with curl:**
+```bash
+curl -X POST http://localhost:8080/ask \
+  -H "Content-Type: application/json" \
+  -d '{"question": "What is the best sci-fi movie of the 90s?"}'
+```
+
+---
+
+## Architecture Overview
+
+```
+Client
+  │
+  ▼
+QuestionController (POST /ask)
+  │
+  ▼
+OpenAiService → OpenAiServiceImpl
+  │  Builds a PromptTemplate from the question
+  │
+  ▼
+ChatModel (Spring AI / OpenAI)
+  │  Returns ChatResponse
+  ▼
+Answer (returned as JSON)
+```
+
+The `SimpleVectorStore` is populated on startup by reading `movies500.csv`,
+splitting its content via `TokenTextSplitter`, generating embeddings through the
+`EmbeddingModel`, and persisting the result to a local JSON file. On subsequent
+startups the vector store is loaded directly from that file, skipping the
+embedding step.
 
 ---
 
@@ -61,10 +124,14 @@ Set the following environment variable before running the application:
 OPENAI_API_KEY=your-openai-api-key-here
 ```
 
-You can also customize the vector store file path in `application.properties`:
+You can also customize the vector store file path and the documents to load in `application.properties`:
 
 ```properties
-sfg.aiapp.vectorStorePath=/tmp/vectorstore.json
+# Resolves to the OS temp directory (cross-platform)
+sfg.aiapp.vectorStorePath=${java.io.tmpdir}vectorstore.json
+
+# Path to the document(s) to be embedded into the vector store
+sfg.aiapp.documentsToLoad[0]=classpath:/movies500.csv
 ```
 
 ---
