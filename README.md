@@ -46,7 +46,9 @@ src/
     │       ├── VectorStoreConfig.java         # SimpleVectorStore bean configuration
     │       └── VectorStoreProperties.java     # External config properties (sfg.aiapp)
     └── resources/
-        └── application.properties             # App settings
+        ├── application.properties             # App settings
+        └── data/
+            └── movies500.csv                  # Movie dataset used to populate the vector store
 ```
 
 ---
@@ -78,6 +80,14 @@ Or on Windows:
 ```powershell
 .\mvnw.cmd spring-boot:run
 ```
+
+---
+
+## Data Source
+
+The file `movies500.csv` used to populate the vector store was sourced from **[Kaggle](https://www.kaggle.com/)**, the world's largest platform for data science and machine learning datasets.
+
+> All data credits go to the original dataset authors on Kaggle.
 
 ---
 
