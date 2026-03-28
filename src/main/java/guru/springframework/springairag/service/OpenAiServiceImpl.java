@@ -31,7 +31,7 @@ public class OpenAiServiceImpl implements OpenAiService{
     public Answer getAnswer(Question question) {
         List<Document> documents = vectorStore.similaritySearch(SearchRequest
                 .builder()
-                .query(question.question()).topK(5)
+                .query(question.question()).topK(4)
                 .build());
 
         assert documents != null;
